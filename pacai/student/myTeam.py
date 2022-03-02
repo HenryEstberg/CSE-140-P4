@@ -2,6 +2,7 @@
 This file contains all agents to be used in createTeam
 Authors:
 Henry Estberg (henrye1@outlook.com)
+Jia Mei
 """
 
 from pacai.util import reflection
