@@ -84,6 +84,20 @@ class OffensiveAgent(CaptureAgent):
             # return the closest food at the end of the loop
             return closestFood
 
+    def getClosestCapsule(self, gameState):
+        capList = self.getCapsules(gameState)
+        agentState = self.getCurrentObservation()
+        currentPos = agentState.getPosition()
+        if len(capList) > 0:
+            closestCap = capList[0]
+            closestCapDist = self.getMazeDistance(currentPos, capList[0])
+            for cap in capList:
+                nextCapDist = self.getMazeDistance(currentPos, cap)
+                if nextCapDist < closestCapDist:
+                    closestCap = cap
+                return closestCap
+
+
 
 class DefensiveAgent(CaptureAgent):
     # I'm not incredibly sure where the gameState that this is called with is coming from,
