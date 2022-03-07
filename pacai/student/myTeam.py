@@ -37,19 +37,25 @@ class OffensiveAgent(CaptureAgent):
     def chooseAction(self, gameState):
         # First we look for the enemies that the agent can currently see
         agentState = self.getCurrentObservation()
+        isRed = self.isOnRedTeam(self.index)
         enemies = [agentState.getAgentState(i) for i in self.getOpponents(agentState)]
         # Ghosts now contains a list of the enemy ghost agents that this agent can see
         ghosts = [a for a in enemies if not a.isPacman() and a.getPosition() is not None]
-
+        currentPos = agentState.getPosition()
+        # targetFood represents the coordinates of the nearest food item that we want to eat
+        # foodDistance is the current maze distance to that food
+        targetFood = self.getClosestFood(gameState, isRed)
+        foodDistance = self.getMazeDistance(currentPos, targetFood)
         if len(ghosts) > 0:
             # ghostDistance is how far away the agent is from all visible ghosts
-            currentPos = agentState.getPosition()
             ghostDistance = []
             for g in ghosts:
                 ghostDistance.append(self.getMazeDistance(currentPos, g.getPosition()))
 
         actions = gameState.getLegalActions(self.index)
         # I'm assuming we want to avoid the agent just pausing, so I am not including stop
+        bestScore = 0
+        bestAction = Directions.STOP
         for action in actions:
             if action != Directions.STOP:
                 successor = self.getSuccessor(gameState, action)
@@ -65,10 +71,28 @@ class OffensiveAgent(CaptureAgent):
                     # the given action
                     for d, nd in ghostDistance, newGhostDistance:
                         distanceChange.append(nd - d)
+                    # totalDistance represents the total distance change from visible ghosts, as
+                    # ideally we would like pacman to run away from all ghosts at once
+                    totalDistance = sum(distnceChange)
+                else:
+                    totalDistance = 0
+                # newFoodDistance represents the new distance to the target food after a move
+                newFoodDistance = self.getMazeDistance(successorPos, targetFood)
+                foodDistanceChange = foodDistance - newFoodDistance
 
-    # Function that returns the coordinates to the closest food
-    def getClosestFood(self, gameState):
-        foodList = self.getFood(gameState)
+                actionScore = -1 * foodDistanceChange+ 5 * totalDistance
+                if actionScore > bestScore:
+                    bestAction = action
+                    bestScore = actionScore
+        return bestAction
+
+    # Function that returns the coordinates to the closest food,
+    # only checking the targeted food for the given team
+    def getClosestFood(self, gameState, isRed):
+        if isRed:
+            foodList = self.getBlueFood(gameState)
+        else:
+            foodList = self.getRedFood(gameState)
         agentState = self.getCurrentObservation()
         currentPos = agentState.getPosition()
         if len(foodList) > 0:
@@ -84,8 +108,13 @@ class OffensiveAgent(CaptureAgent):
             # return the closest food at the end of the loop
             return closestFood
 
-    def getClosestCapsule(self, gameState):
-        capList = self.getCapsules(gameState)
+    # Function that returns the coordinates to the closest food,
+    # only checking the targeted food for the given team
+    def getClosestCapsule(self, gameState, isRed):
+        if isRed:
+            capList = self.getBlueCapsules(gameState)
+        else:
+            capList = self.getRedCapsules(gameState)
         agentState = self.getCurrentObservation()
         currentPos = agentState.getPosition()
         if len(capList) > 0:
@@ -105,6 +134,7 @@ class DefensiveAgent(CaptureAgent):
     def chooseAction(self, gameState):
         # First we look for the enemies that the agent can currently see
         agentState = self.getCurrentObservation()
+        isRed = self.isOnRedTeam(self.index)
         enemies = [agentState.getAgentState(i) for i in self.getOpponents(agentState)]
         # Invaders now contains a list of the enemy pacman agents that this agent can see
         invaders = [a for a in enemies if a.isPacman() and a.getPosition() is not None]
