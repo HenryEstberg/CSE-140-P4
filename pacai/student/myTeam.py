@@ -12,25 +12,6 @@ from pacai.util import util
 import random
 
 
-def createTeam(firstIndex, secondIndex, isRed,
-               first='pacai.student.myTeam.OffensiveAgent',
-               second='pacai.student.myTeam.DefensiveAgent'):
-    """
-    This function should return a list of two agents that will form the capture team,
-    initialized using firstIndex and secondIndex as their agent indexed.
-    isRed is True if the red team is being created,
-    and will be False if the blue team is being created.
-    """
-
-    firstAgent = reflection.qualifiedImport(first)
-    secondAgent = reflection.qualifiedImport(second)
-
-    return [
-        firstAgent(firstIndex),
-        secondAgent(secondIndex),
-    ]
-
-
 # This agent attempts to target the nearest pellet on the other side of the board
 class OffensiveAgent(CaptureAgent):
     def __init__(self, index, **kwargs):
@@ -179,3 +160,22 @@ class DefensiveAgent(CaptureAgent):
             'stop': 0,
             'reverse': 0
         }
+
+
+def createTeam(firstIndex, secondIndex, isRed,
+               first='pacai.student.myTeam.OffensiveAgent',
+               second='pacai.student.myTeam.DefensiveAgent'):
+    """
+    This function should return a list of two agents that will form the capture team,
+    initialized using firstIndex and secondIndex as their agent indexed.
+    isRed is True if the red team is being created,
+    and will be False if the blue team is being created.
+    """
+
+    firstAgent = OffensiveAgent
+    secondAgent = DefensiveAgent
+
+    return [
+        firstAgent(firstIndex),
+        secondAgent(secondIndex),
+    ]
