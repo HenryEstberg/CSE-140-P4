@@ -3,6 +3,7 @@ This file contains all agents to be used in createTeam
 Authors:
 Henry Estberg (henrye1@outlook.com)
 Jia Mei
+Benjamin Quang
 """
 
 from pacai.util import reflection
@@ -53,25 +54,27 @@ class OffensiveAgent(CaptureAgent):
         myState = successor.getAgentState(self.index)
         myPos = myState.getPosition()
         features['successorScore'] = self.getScore(successor)
-        # Compute distance to the nearest food.
+        allCapsules = self.getCapsules(successor)
         foodList = self.getFood(successor).asList()
 
-        # This should always be True, but better safe than sorry.
+        # find distance to closest food
         if len(foodList) > 0:
             myPos = successor.getAgentState(self.index).getPosition()
             minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
             features['distanceToFood'] = minDistance
 
+        # find distance to closest capsule
         allCapsules = self.getCapsules(successor)
         if len(allCapsules) > 0:
             closestCapsule = min([self.getMazeDistance(myPos, c) for c in allCapsules])
             features['distanceToCapsule'] = closestCapsule
 
+        # find distance to closest attacker
         enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
         attackers = [a for a in enemies if a.isPacman() and a.getPosition() is not None]
         if len(attackers) > 0:
-            dists = [self.getMazeDistance(myPos, a.getPosition()) for a in attackers]
-            features['attackerDistance'] = min(dists)
+            dists = min([self.getMazeDistance(myPos, a.getPosition()) for a in attackers])
+            features['attackerDistance'] = dists
 
         return features
 
@@ -80,7 +83,7 @@ class OffensiveAgent(CaptureAgent):
             'successorScore': 100,
             'distanceToFood': -1,
             'attackerDistance': -10,
-            'distanceToCapsule': -1
+            'distanceToCapsule': 0
         }
 
 
