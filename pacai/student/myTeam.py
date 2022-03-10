@@ -64,7 +64,6 @@ class OffensiveAgent(CaptureAgent):
             features['distanceToFood'] = minDistance
 
         # find distance to closest capsule
-        allCapsules = self.getCapsules(successor)
         if len(allCapsules) > 0:
             closestCapsule = min([self.getMazeDistance(myPos, c) for c in allCapsules])
             features['distanceToCapsule'] = closestCapsule
